@@ -17,7 +17,7 @@ notebooks or other scripts.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -37,7 +37,8 @@ DEFAULT_NOTCH = (50.0, 60.0)
 DEFAULT_FILTER = (0.1, 40.0)
 DEFAULT_BASELINE = (None, 0.0)
 DEFAULT_EPOCH_WINDOW = (-0.2, 0.8)
-DEFAULT_REJECT = dict(grad=4000e-13, mag=4e-12, eeg=150e-6, eog=250e-6)
+#DEFAULT_REJECT = dict(grad=4000e-13, mag=4e-12, eeg=150e-6, eog=250e-6)
+DEFAULT_REJECT = dict(grad=4000e-13, mag=4e-12, eeg=150e-6)
 DEFAULT_ERP_WINDOWS = [(0.05, 0.15), (0.15, 0.3), (0.3, 0.6)]
 DEFAULT_MORLET_BANDS = {
     "theta": np.arange(4.0, 8.1, 1.0),
@@ -68,7 +69,7 @@ class PreprocessingConfig:
     tmin: float = DEFAULT_EPOCH_WINDOW[0]
     tmax: float = DEFAULT_EPOCH_WINDOW[1]
     baseline: Tuple[Optional[float], Optional[float]] = DEFAULT_BASELINE
-    reject: Optional[Dict[str, float]] = DEFAULT_REJECT
+    reject: Optional[Dict[str, float]] = field(default_factory=lambda: DEFAULT_REJECT.copy())
     event_id: Optional[Dict[str, int]] = None
     bad_z_threshold: float = 5.0
     random_state: int = 97
@@ -242,8 +243,8 @@ def load_and_preprocess(cfg: PreprocessingConfig) -> mne.Epochs:
         mne.utils.logger.info("Detected bad channels: %s", ", ".join(bads))
     raw.interpolate_bads(reset_bads=True)
 
-    ica = run_ica(raw, cfg.random_state)
-    raw = ica.apply(raw.copy())
+    #ica = run_ica(raw, cfg.random_state)
+    #raw = ica.apply(raw.copy())
 
     events, event_id = mne.events_from_annotations(raw, event_id=cfg.event_id)
     events, label_map = _relabel_events(events, event_id, cfg.label_mode)
